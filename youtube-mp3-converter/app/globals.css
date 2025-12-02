@@ -1,0 +1,143 @@
+/* Import all styles */
+@import '../styles/material-theme.css';
+@import '../styles/components.css';
+@import '../styles/responsive.css';
+@import '../styles/animations.css';
+
+/* Additional Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--md-font-family);
+  font-size: var(--md-font-size-base);
+  line-height: 1.5;
+  background-color: var(--md-surface);
+  color: var(--md-on-surface);
+  transition: background-color var(--md-transition-medium), color var(--md-transition-medium);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--md-neutral-10);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--md-neutral-40);
+  border-radius: var(--md-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-neutral-50);
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--md-primary-40);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--md-primary-90);
+  color: var(--md-primary-10);
+}
+
+/* Icon Styles */
+.youtube-icon {
+  filter: drop-shadow(0 2px 4px rgba(255, 0, 0, 0.3));
+}
+
+.music-icon {
+  filter: drop-shadow(0 2px 4px rgba(33, 150, 243, 0.3));
+}
+
+.icon-group {
+  display: flex;
+  justify-content: center;
+  gap: var(--md-spacing-4);
+  margin-bottom: var(--md-spacing-6);
+}
+
+/* Gradient Background */
+.gradient-bg {
+  background: linear-gradient(135deg, 
+    var(--md-primary-95) 0%, 
+    var(--md-secondary-95) 50%, 
+    var(--md-tertiary-95) 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%);
+  pointer-events: none;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--md-radius-lg);
+  box-shadow: var(--md-shadow-2);
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform var(--md-transition-fast), box-shadow var(--md-transition-fast);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-shadow-3);
+}
+
+/* Loading States */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+/* Success State */
+.success-state {
+  background: linear-gradient(135deg, var(--md-tertiary-90), var(--md-tertiary-80));
+  color: var(--md-tertiary-10);
+}
+
+/* Error State */
+.error-state {
+  background: linear-gradient(135deg, var(--md-error-90), var(--md-error-80));
+  color: var(--md-error-10);
+}
