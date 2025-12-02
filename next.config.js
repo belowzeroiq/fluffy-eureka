@@ -6,10 +6,6 @@ const nextConfig = {
   images: {
     domains: ['i.ytimg.com', 'img.youtube.com'],
   },
-  env: {
-    NEXT_PUBLIC_RAPIDAPI_KEY: process.env.NEXT_PUBLIC_RAPIDAPI_KEY,
-    NEXT_PUBLIC_RAPIDAPI_HOST: process.env.NEXT_PUBLIC_RAPIDAPI_HOST,
-  },
   // Optimize for Vercel deployment
   swcMinify: true,
   // Enable compression
