@@ -9,9 +9,5 @@
     "app/api/convert/route.ts": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NEXT_PUBLIC_RAPIDAPI_KEY": "@rapidapi_key",
-    "NEXT_PUBLIC_RAPIDAPI_HOST": "@rapidapi_host"
   }
 }
