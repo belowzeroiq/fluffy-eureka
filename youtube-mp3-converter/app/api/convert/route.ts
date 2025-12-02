@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import YTDlpWrap from 'yt-dlp-wrap';
 
-// Free YouTube downloader using yt-dlp
+// Free YouTube downloader using Cobalt.tools API (open source)
 export async function POST(request: NextRequest) {
   try {
-    const { url, format = 'mp3' } = await request.json();
+    const { url } = await request.json();
     
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -19,21 +15,110 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });
     }
 
-    // Create temporary directory for processing
-    const tempDir = path.join('/tmp', uuidv4());
-    await fs.mkdir(tempDir, { recursive: true });
+    // Use free Cobalt API (open source, no key required)
+    const response = await fetch('https://co.wuk.sh/api/json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        url: url,
+        vQuality: '720p',
+        aFormat: 'mp3',
+        filenamePattern: 'basic',
+        isAudioOnly: true,
+        dubLang: false
+      })
+    });
 
+    if (!response.ok) {
+      throw new Error('Failed to fetch from Cobalt API');
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'error') {
+      throw new Error(data.text || 'Conversion failed');
+    }
+
+    if (data.status === 'stream' || data.status === 'redirect') {
+      return NextResponse.json({
+        title: `YouTube Video ${videoId}`,
+        duration: 'Unknown',
+        thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+        downloadUrl: data.url,
+        videoId: videoId,
+        format: 'mp3',
+        quality: '192K'
+      });
+    }
+
+    throw new Error('Unexpected response format');
+
+  } catch (error) {
+    console.error('Conversion error:', error);
+    
+    // Fallback to another free service
     try {
-      // Initialize yt-dlp
-      const ytDlp = new YTDlpWrap();
-      
-      // Get video info first (free)
-      const videoInfo = await ytDlp.getVideoInfo(url);
-      
-      if (!videoInfo.title) {
-        throw new Error('Could not fetch video information');
-      }
+      return await fallbackConvert(request);
+    } catch (fallbackError) {
+      return NextResponse.json(
+        { error: 'Failed to process video. Please try again.' }, 
+        { status: 500 }
+      );
+    }
+  }
+}
 
+// Fallback free converter
+async function fallbackConvert(request: NextRequest): Promise<NextResponse> {
+  const { url } = await request.json();
+  const videoId = extractVideoId(url);
+
+  // Use another free API (rotate between free services)
+  const freeServices = [
+    'https://api.ryzendown.cc/v1/yt-download',
+    'https://yt-download.org/api/button/mp3',
+    'https://www.yt2mp3s.me/@api/json/mp3'
+  ];
+
+  for (const service of freeServices) {
+    try {
+      const response = await fetch(service, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url, videoId: videoId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.downloadUrl || data.url) {
+          return NextResponse.json({
+            title: data.title || `YouTube Video ${videoId}`,
+            duration: data.duration || 'Unknown',
+            thumbnail: data.thumbnail || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+            downloadUrl: data.downloadUrl || data.url,
+            videoId: videoId,
+            format: 'mp3',
+            quality: data.quality || '192K'
+          });
+        }
+      }
+    } catch (error) {
+      console.log(`Service ${service} failed, trying next...`);
+      continue;
+    }
+  }
+
+  throw new Error('All free services failed');
+}
+
+function extractVideoId(url: string): string | null {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
       // Generate output filename
       const outputFile = path.join(tempDir, `${sanitizeFilename(videoInfo.title)}.%(ext)s`);
       
